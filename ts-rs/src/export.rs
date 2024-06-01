@@ -196,12 +196,11 @@ fn generate_imports<T: TS + ?Sized + 'static>(
     for (_, dep) in deduplicated_deps {
         let dep_path = out_dir.as_ref().join(dep.output_path);
         let rel_path = import_path(&path, &dep_path);
-        writeln!(
-            out,
-            "import type {{ {} }} from {:?};",
-            &dep.ts_name, rel_path
-        )
-        .unwrap();
+        let mut name = dep.ts_name.clone();
+        if let Some(i) = name.find('<') {
+            name = name[..i].to_string();
+        }
+        writeln!(out, "import type {{ {} }} from '{}.ts';", name, rel_path).unwrap();
     }
     writeln!(out).unwrap();
     Ok(())
