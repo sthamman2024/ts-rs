@@ -45,7 +45,13 @@ impl DerivedTS {
                     format!("{}{}.ts", dirname, self.ts_name)
                 }
                 Some(filename) => filename.to_owned(),
-                None => format!("{}.ts", self.ts_name),
+                None => {
+                    let mut name = self.ts_name.clone();
+                    if let Some(i) = name.find('<') {
+                        name = name[..i].to_string();
+                    }
+                    format!("{}.ts", name)
+                }
             };
 
             quote! {
