@@ -308,7 +308,10 @@ fn generate_imports<T: TS + ?Sized + 'static>(
     for (_, dep) in deduplicated_deps {
         let dep_path = out_dir.as_ref().join(dep.output_path);
         let rel_path = import_path(&path, &dep_path)?;
-
+        let mut name = dep.ts_name.clone();
+        if let Some(i) = name.find('<') {
+            name = name[..i].to_string();
+        }
         let is_same_file = path
             .file_name()
             .and_then(std::ffi::OsStr::to_str)
@@ -321,11 +324,7 @@ fn generate_imports<T: TS + ?Sized + 'static>(
             continue;
         }
 
-        writeln!(
-            out,
-            r#"import type {{ {} }} from "{}";"#,
-            &dep.ts_name, rel_path
-        )?;
+        writeln!(out, r#"import type {{ {} }} from "{}";"#, name, rel_path)?;
     }
     writeln!(out)?;
     Ok(())
